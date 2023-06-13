@@ -72,6 +72,8 @@ func (r *LocalRunner) newExecutable(fileBlock project.FileCodeBlock) (runner.Exe
 		customShell = fmtr.Shell
 	}
 
+	programName, _ := runner.GetCellProgram(fileBlock.GetBlock().Language(), customShell)
+
 	r.session.AddEnvs(r.envs)
 
 	cfg := &runner.ExecutableConfig{
@@ -120,7 +122,12 @@ func (r *LocalRunner) newExecutable(fileBlock project.FileCodeBlock) (runner.Exe
 			Source:           string(block.Content()),
 		}, nil
 	default:
-		return nil, nil
+		return &runner.TempFile{
+			ExecutableConfig: cfg,
+			Script:           strings.Join(block.Lines(), "\n"),
+			ProgramName:      programName,
+			LanguageID:       block.Language(),
+		}, nil
 	}
 }
 
